@@ -1,12 +1,13 @@
-import openai
+import os
 import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+from openai import OpenAI
 
 # === Config ===
-TELEGRAM_TOKEN = "8004992156:AAGFY7yw2oLkU4hm7XV2BC9r5A9H4Qzyt28"
-OPENAI_API_KEY = "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"
-openai.api_key = OPENAI_API_KEY
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # === Logging ===
 logging.basicConfig(level=logging.INFO)
@@ -14,7 +15,7 @@ logging.basicConfig(level=logging.INFO)
 # === Memory per user ===
 user_memory = {}
 
-# === OpenAI ChatGPT with memory ===
+# === OpenAI ChatGPT Function ===
 async def ask_chatgpt(user_id: int, prompt: str) -> str:
     if user_id not in user_memory:
         user_memory[user_id] = []
@@ -22,7 +23,7 @@ async def ask_chatgpt(user_id: int, prompt: str) -> str:
     user_memory[user_id].append({"role": "user", "content": prompt})
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=user_memory[user_id],
             temperature=0.7
