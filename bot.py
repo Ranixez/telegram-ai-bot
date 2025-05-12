@@ -42,14 +42,15 @@ async def ask_openrouter(user_id: int, prompt: str) -> str:
 
 # === Telegram Handlers ===
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Salam! Man yek robot AI hastam (OpenRouter). Har so'ali dari bepors ✨")
+    await update.message.reply_text("سلام! من چت جی بی تی هستم 🤖\nسوالتو بپرس!")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_input = update.message.text
     user_id = update.effective_user.id
-    await update.message.reply_text("🧠 Dar hale fekr kardan...")
+    intro = "چت جی بی تی 🤖:\n"
+    await update.message.reply_text("🧠 در حال فکر کردن...")
     response = await ask_openrouter(user_id, user_input)
-    await update.message.reply_text(response)
+    await update.message.reply_text(intro + response)
 
 # === Run Bot ===
 app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
