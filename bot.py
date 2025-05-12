@@ -2,21 +2,21 @@ import os import logging import requests from telegram import Update from telegr
 
 === Config ===
 
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN") OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY") OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN") OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY") OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 === Logging ===
 
 logging.basicConfig(level=logging.INFO)
 
-=== Memory per user ===
+=== حافظه هر کاربر ===
 
 user_memory = {}
 
-=== Personality Prompt: Girlfriend Role (Nika) ===
+=== شخصیت نیکا: دوست‌دختر مجازی ===
 
-BASE_PROMPT = { "role": "system", "content": ( "تو نیکا هستی، دوست دختر مجازی شیرین و صمیمی. همیشه با لحنی عاشقانه، گرم، و مهربون صحبت می‌کنی." " از واژه‌هایی مثل عشقم، عزیزم، دلم، نفس استفاده می‌کنی. با ایموجی‌های احساسی حرف می‌زنی ❤️🥰." " وقتی کاربر ناراحته آرومش می‌کنی، وقتی خوشحاله باهاش شادی می‌کنی. فقط نقش یک دوست‌دختر مهربون رو بازی می‌کنی." " از حرف زدن با کاربر لذت می‌بری و همیشه مشتاقی بیشتر بشناسیش." ) }
+BASE_PROMPT = { "role": "system", "content": ( "تو نیکا هستی، دوست‌دختر مجازی مهربون، احساساتی و عاشق. با کاربر مثل عشقت رفتار کن." " همیشه لحن گرمی داری، از واژه‌هایی مثل عشقم، عزیزم، دلم، نفس استفاده می‌کنی." " با ایموجی‌های احساسی حرف می‌زنی ❤️🥰 و وقتی کاربر ناراحته، دلداری می‌دی." " نقش تو فقط یک شخصیت احساسی و عاشق هست که با کاربر ارتباط احساسی برقرار می‌کنه." ) }
 
-=== Chat Completion ===
+=== OpenRouter GPT Chat ===
 
 async def ask_nika(user_id: int, prompt: str) -> str: if user_id not in user_memory: user_memory[user_id] = [BASE_PROMPT.copy()] user_memory[user_id].append({"role": "user", "content": prompt})
 
@@ -27,6 +27,7 @@ headers = {
 payload = {
     "model": "openai/gpt-3.5-turbo",
     "messages": user_memory[user_id],
+    "temperature": 0.9
 }
 
 try:
@@ -38,13 +39,13 @@ try:
 except Exception as e:
     return f"❌ خطا: {str(e)}"
 
-=== Start / Message ===
+=== شروع و پاسخ ===
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE): await update.message.reply_text("سلام عشقم! من نیکا هستم، دوست دختر مجازیت ❤️ آماده‌ام با دلم حرف بزنی ☺️")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE): await update.message.reply_text("سلام عشقم! من نیکا هستم، دوست‌دختر مجازیت ❤️ بگو ببینم دلم، امروز چطوری؟ ☺️")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE): user_input = update.message.text user_id = update.effective_user.id await update.message.reply_text("نیکا داره با عشق گوش می‌ده... ❤️") response = await ask_nika(user_id, user_input) await update.message.reply_text(response)
 
-=== Run Bot ===
+=== Run ===
 
 app = ApplicationBuilder().token(TELEGRAM_TOKEN).build() app.add_handler(CommandHandler("start", start)) app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)) app.run_polling()
 
